@@ -10,12 +10,14 @@ import {
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
 import type { FraudEvaluation } from "@/lib/fraud-types";
+import { tip } from "@/lib/fraud-tooltips";
+import { Tooltip } from "@/components/ui/tooltip";
 
 const AXIS = "#6b6b80";
 const GRID = "#e8dff0";
@@ -80,7 +82,7 @@ export function PrecisionRecallChart({
           <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
           <XAxis dataKey="recall" stroke={AXIS} domain={[0, 1]} type="number" />
           <YAxis dataKey="precision" stroke={AXIS} domain={[0, 1]} type="number" />
-          <Tooltip />
+          <RechartsTooltip />
           <Line type="monotone" dataKey="precision" stroke={VIOLET} strokeWidth={2.5} dot={false} />
         </LineChart>
       </ResponsiveContainer>
@@ -132,7 +134,7 @@ export function CalibrationChart({ data }: { data: FraudEvaluation["calibration_
             allowDuplicatedCategory={false}
           />
           <YAxis dataKey="fraction_positive" type="number" domain={[0, 1]} stroke={AXIS} />
-          <Tooltip />
+          <RechartsTooltip />
           <Line
             data={diagonal}
             type="linear"
@@ -162,10 +164,10 @@ export function ConfusionMatrixBlock({
   matrix: FraudEvaluation["confusion_matrix"];
 }) {
   const cells = [
-    { label: "TN", value: matrix.tn, tone: "bg-soft" },
-    { label: "FP", value: matrix.fp, tone: "bg-blush/15" },
-    { label: "FN", value: matrix.fn, tone: "bg-blush/15" },
-    { label: "TP", value: matrix.tp, tone: "bg-mint/20" },
+    { label: "TN", value: matrix.tn, tone: "bg-soft", tipKey: "tn" as const },
+    { label: "FP", value: matrix.fp, tone: "bg-blush/15", tipKey: "fp" as const },
+    { label: "FN", value: matrix.fn, tone: "bg-blush/15", tipKey: "fn" as const },
+    { label: "TP", value: matrix.tp, tone: "bg-mint/20", tipKey: "tp" as const },
   ];
   return (
     <div
@@ -174,10 +176,12 @@ export function ConfusionMatrixBlock({
       aria-label={`Confusion matrix TN ${matrix.tn}, FP ${matrix.fp}, FN ${matrix.fn}, TP ${matrix.tp}`}
     >
       {cells.map((cell) => (
-        <div key={cell.label} className={`rounded-2xl p-3 ${cell.tone}`} role="cell">
-          <div className="text-[11px] font-medium text-muted">{cell.label}</div>
-          <div className="mt-1 font-display text-xl font-bold">{cell.value}</div>
-        </div>
+        <Tooltip key={cell.label} content={tip(cell.tipKey)} wide className="block">
+          <div className={`rounded-2xl p-3 ${cell.tone}`} role="cell">
+            <div className="text-[11px] font-medium text-muted">{cell.label}</div>
+            <div className="mt-1 font-display text-xl font-bold">{cell.value}</div>
+          </div>
+        </Tooltip>
       ))}
     </div>
   );
@@ -230,7 +234,7 @@ export function ThresholdCostChart({
           <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
           <XAxis dataKey="review_threshold" stroke={AXIS} />
           <YAxis stroke={AXIS} />
-          <Tooltip />
+          <RechartsTooltip />
           <Bar dataKey="expected_cost" fill={BLUSH} radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
@@ -281,7 +285,7 @@ export function DecisionRateBars({
           <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
           <XAxis dataKey="name" stroke={AXIS} />
           <YAxis stroke={AXIS} domain={[0, 1]} />
-          <Tooltip />
+          <RechartsTooltip />
           <Bar dataKey="value" radius={[8, 8, 0, 0]}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={colors[index % colors.length]} />

@@ -29,8 +29,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { MetricTile, TipLabel, TipText, TipTitle, Tooltip } from "@/components/ui/tooltip";
 import { analyzeFraudTransaction, evaluateFraudDataset, generateFraudDataset } from "@/lib/api";
+import { tip, type FraudTooltipKey } from "@/lib/fraud-tooltips";
 import type {
   FraudAnalyzeResponse,
   FraudEvaluateResponse,
@@ -62,11 +63,43 @@ const defaultGenerator: FraudGeneratePayload = {
   suspicious_legit_rate: 0.18,
 };
 
-const TABS: { id: MainTab; label: string }[] = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "transactions", label: "Transactions" },
-  { id: "policy", label: "Policy" },
-  { id: "evidence", label: "Evidence" },
+const TABS: { id: MainTab; label: string; tipKey: FraudTooltipKey }[] = [
+  { id: "dashboard", label: "Dashboard", tipKey: "tabDashboard" },
+  { id: "transactions", label: "Transactions", tipKey: "tabTransactions" },
+  { id: "policy", label: "Policy", tipKey: "tabPolicy" },
+  { id: "evidence", label: "Evidence", tipKey: "tabEvidence" },
+];
+
+const SIDE_TIPS: Record<SideNav, FraudTooltipKey> = {
+  generate: "sideGenerate",
+  policy: "sidePolicy",
+  evidence: "sideEvidence",
+  model: "sideModel",
+  charts: "sideCharts",
+  more: "sideMore",
+};
+
+const GENERATOR_FIELDS: { key: keyof FraudGeneratePayload; label: string; tipKey: FraudTooltipKey }[] = [
+  { key: "number_of_users", label: "Users", tipKey: "number_of_users" },
+  { key: "number_of_transactions", label: "Transactions", tipKey: "number_of_transactions" },
+  { key: "fraud_rate", label: "Fraud rate", tipKey: "fraud_rate" },
+  { key: "hard_fraud_rate", label: "Hard fraud rate", tipKey: "hard_fraud_rate" },
+  { key: "suspicious_legit_rate", label: "Suspicious legit rate", tipKey: "suspicious_legit_rate" },
+  { key: "time_range_days", label: "Time range (days)", tipKey: "time_range_days" },
+  { key: "seed", label: "Seed", tipKey: "seed" },
+];
+
+const HOLDOUT_METRICS: { label: string; tipKey: FraudTooltipKey }[] = [
+  { label: "PR-AUC", tipKey: "prAuc" },
+  { label: "Precision", tipKey: "precision" },
+  { label: "Recall", tipKey: "recall" },
+  { label: "F1", tipKey: "f1" },
+  { label: "Brier", tipKey: "brier" },
+  { label: "FPR", tipKey: "fpr" },
+  { label: "FNR", tipKey: "fnr" },
+  { label: "Expected cost", tipKey: "expectedCost" },
+  { label: "Review rate", tipKey: "reviewRate" },
+  { label: "Prevalence", tipKey: "prevalence" },
 ];
 
 export function FraudLab() {
@@ -284,6 +317,7 @@ export function FraudLab() {
     {
       gradient: "bg-grad-coral",
       label: "PR-AUC",
+      tipKey: "metricCardPrAuc" as const,
       value: evalBlock ? evalBlock.pr_auc.toFixed(4) : "—",
       hint: evalBlock ? "Holdout ranking quality" : "Run evaluate to unlock",
       icon: "A",
@@ -291,6 +325,7 @@ export function FraudLab() {
     {
       gradient: "bg-grad-violet",
       label: "Precision",
+      tipKey: "metricCardPrecision" as const,
       value: evalBlock ? formatPct(evalBlock.precision) : "—",
       hint: evalBlock ? `Recall ${formatPct(evalBlock.recall)}` : "Awaiting model fold",
       icon: "P",
@@ -298,6 +333,7 @@ export function FraudLab() {
     {
       gradient: "bg-grad-sky",
       label: "Expected cost",
+      tipKey: "metricCardCost" as const,
       value: evalBlock ? evalBlock.expected_cost.toFixed(2) : "—",
       hint: evalBlock ? `Review ${formatPct(evalBlock.review_rate)}` : "Policy sweep pending",
       icon: "C",
@@ -307,20 +343,12 @@ export function FraudLab() {
   const policyControls = (
     <div className="space-y-4">
       <div className="space-y-3">
-        <h2 className="font-display text-sm font-semibold">Synthetic Generator</h2>
-        {(
-          [
-            ["number_of_users", "Users"],
-            ["number_of_transactions", "Transactions"],
-            ["fraud_rate", "Fraud rate"],
-            ["hard_fraud_rate", "Hard fraud rate"],
-            ["suspicious_legit_rate", "Suspicious legit rate"],
-            ["time_range_days", "Time range (days)"],
-            ["seed", "Seed"],
-          ] as const
-        ).map(([key, label]) => (
+        <TipTitle tip={tip("generateButton")}>Synthetic Generator</TipTitle>
+        {GENERATOR_FIELDS.map(({ key, label, tipKey }) => (
           <div key={key}>
-            <Label htmlFor={key}>{label}</Label>
+            <TipLabel htmlFor={key} tip={tip(tipKey)}>
+              {label}
+            </TipLabel>
             <Input
               id={key}
               type="number"
@@ -339,9 +367,11 @@ export function FraudLab() {
             />
           </div>
         ))}
-        <Button onClick={runGenerate} disabled={loading !== null} className="w-full" variant="accent">
-          {loading === "generate" ? "Generating…" : "Generate Fraud Dataset"}
-        </Button>
+        <Tooltip content={tip("generateButton")} wide className="w-full">
+          <Button onClick={runGenerate} disabled={loading !== null} className="w-full" variant="accent">
+            {loading === "generate" ? "Generating…" : "Generate Fraud Dataset"}
+          </Button>
+        </Tooltip>
         {generateMeta ? (
           <div className="rounded-2xl bg-white/70 p-3 text-xs leading-relaxed text-muted">
             <div>Users: {generateMeta.number_of_users.toLocaleString()}</div>
@@ -352,9 +382,11 @@ export function FraudLab() {
       </div>
 
       <div className="space-y-3 border-t border-white/50 pt-4">
-        <h2 className="font-display text-sm font-semibold">Decision Policy</h2>
+        <TipTitle tip={tip("policyNote")}>Decision Policy</TipTitle>
         <div>
-          <Label htmlFor="allow">Allow threshold</Label>
+          <TipLabel htmlFor="allow" tip={tip("allowThreshold")}>
+            Allow threshold
+          </TipLabel>
           <Input
             id="allow"
             type="number"
@@ -366,7 +398,9 @@ export function FraudLab() {
           />
         </div>
         <div>
-          <Label htmlFor="review">Review / block threshold</Label>
+          <TipLabel htmlFor="review" tip={tip("reviewThreshold")}>
+            Review / block threshold
+          </TipLabel>
           <Input
             id="review"
             type="number"
@@ -379,15 +413,21 @@ export function FraudLab() {
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div>
-            <Label htmlFor="fp">FP cost</Label>
+            <TipLabel htmlFor="fp" tip={tip("fpCost")}>
+              FP cost
+            </TipLabel>
             <Input id="fp" type="number" value={fpCost} onChange={(e) => setFpCost(Number(e.target.value))} />
           </div>
           <div>
-            <Label htmlFor="fn">FN cost</Label>
+            <TipLabel htmlFor="fn" tip={tip("fnCost")}>
+              FN cost
+            </TipLabel>
             <Input id="fn" type="number" value={fnCost} onChange={(e) => setFnCost(Number(e.target.value))} />
           </div>
           <div>
-            <Label htmlFor="rv">Review</Label>
+            <TipLabel htmlFor="rv" tip={tip("reviewCost")}>
+              Review
+            </TipLabel>
             <Input
               id="rv"
               type="number"
@@ -396,17 +436,19 @@ export function FraudLab() {
             />
           </div>
         </div>
-        <p className="text-[11px] leading-relaxed text-muted">
+        <TipText tip={tip("policyNote")} className="text-[11px] leading-relaxed text-muted">
           LOW → ALLOW · MEDIUM → REVIEW · HIGH → BLOCK. Thresholds are versioned separately from the
           EBM.
-        </p>
-        <Button
-          onClick={runEvaluate}
-          disabled={loading !== null || !transactions.length}
-          className="w-full"
-        >
-          {loading === "evaluate" ? "Evaluating…" : "Train · Calibrate · Evaluate"}
-        </Button>
+        </TipText>
+        <Tooltip content={tip("evaluateButton")} wide className="w-full">
+          <Button
+            onClick={runEvaluate}
+            disabled={loading !== null || !transactions.length}
+            className="w-full"
+          >
+            {loading === "evaluate" ? "Evaluating…" : "Train · Calibrate · Evaluate"}
+          </Button>
+        </Tooltip>
       </div>
     </div>
   );
@@ -420,11 +462,9 @@ export function FraudLab() {
               <Shield className="h-4 w-4 text-white" aria-hidden />
             </div>
             <div>
-              <div className="font-display text-xl font-bold tracking-tight">Fraud Lab
-    
-              </div>
+              <div className="font-display text-xl font-bold tracking-tight">Fraud Lab</div>
               <div className="text-[11px] font-medium text-muted" lang="ur" dir="rtl">
-              Evidence before automation
+                Evidence before automation
               </div>
             </div>
           </div>
@@ -433,36 +473,42 @@ export function FraudLab() {
           </div>
         </div>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="rounded-full border-white/90 bg-white/80 pl-10"
-            aria-label="Search transactions"
-          />
-        </div>
+        <Tooltip content={tip("search")} side="bottom" className="relative w-full">
+          <div className="relative w-full">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              className="rounded-full border-white/90 bg-white/80 pl-10"
+              aria-label="Search transactions"
+            />
+          </div>
+        </Tooltip>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-white/70 p-3 shadow-card">
-            <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
-              <ArrowUpRight className="h-3.5 w-3.5 text-mint" />
-              Fraud rate
+          <Tooltip content={tip("fraudRateSummary")} wide className="block">
+            <div className="rounded-2xl bg-white/70 p-3 shadow-card">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
+                <ArrowUpRight className="h-3.5 w-3.5 text-mint" />
+                Fraud rate
+              </div>
+              <div className="mt-1 font-display text-lg font-bold text-mint">
+                {generateMeta ? `+${formatPct(generateMeta.realized_fraud_rate)}` : "—"}
+              </div>
             </div>
-            <div className="mt-1 font-display text-lg font-bold text-mint">
-              {generateMeta ? `+${formatPct(generateMeta.realized_fraud_rate)}` : "—"}
+          </Tooltip>
+          <Tooltip content={tip("expectedCostSummary")} wide className="block">
+            <div className="rounded-2xl bg-white/70 p-3 shadow-card">
+              <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
+                <ArrowDownLeft className="h-3.5 w-3.5 text-muted" />
+                Exp. cost
+              </div>
+              <div className="mt-1 font-display text-lg font-bold text-ink">
+                {evalBlock ? `-${evalBlock.expected_cost.toFixed(0)}` : "—"}
+              </div>
             </div>
-          </div>
-          <div className="rounded-2xl bg-white/70 p-3 shadow-card">
-            <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
-              <ArrowDownLeft className="h-3.5 w-3.5 text-muted" />
-              Exp. cost
-            </div>
-            <div className="mt-1 font-display text-lg font-bold text-ink">
-              {evalBlock ? `-${evalBlock.expected_cost.toFixed(0)}` : "—"}
-            </div>
-          </div>
+          </Tooltip>
         </div>
 
         <div className="grid grid-cols-3 gap-2.5">
@@ -470,20 +516,21 @@ export function FraudLab() {
             const Icon = item.icon;
             const active = sideNav === item.id;
             return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={item.onClick}
-                className={cn(
-                  "flex aspect-square flex-col items-center justify-center gap-1.5 rounded-2xl transition",
-                  active
-                    ? "bg-white text-ink shadow-lift"
-                    : "bg-white/25 text-muted hover:bg-white/50",
-                )}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-[10px] font-semibold">{item.label}</span>
-              </button>
+              <Tooltip key={item.id} content={tip(SIDE_TIPS[item.id])} side="right" className="block w-full">
+                <button
+                  type="button"
+                  onClick={item.onClick}
+                  className={cn(
+                    "flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-2xl transition",
+                    active
+                      ? "bg-white text-ink shadow-lift"
+                      : "bg-white/25 text-muted hover:bg-white/50",
+                  )}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-[10px] font-semibold">{item.label}</span>
+                </button>
+              </Tooltip>
             );
           })}
         </div>
@@ -500,34 +547,36 @@ export function FraudLab() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <nav className="flex flex-wrap items-center gap-1 rounded-full bg-soft/80 p-1">
             {TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setTab(item.id);
-                  if (item.id === "policy") setSideNav("policy");
-                  if (item.id === "evidence") setSideNav("evidence");
-                  if (item.id === "dashboard") setSideNav("charts");
-                  if (item.id === "transactions") setSideNav("more");
-                }}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition",
-                  tab === item.id ? "bg-blush text-white shadow-card" : "text-muted hover:text-ink",
-                )}
-              >
-                {item.label}
-              </button>
+              <Tooltip key={item.id} content={tip(item.tipKey)}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTab(item.id);
+                    if (item.id === "policy") setSideNav("policy");
+                    if (item.id === "evidence") setSideNav("evidence");
+                    if (item.id === "dashboard") setSideNav("charts");
+                    if (item.id === "transactions") setSideNav("more");
+                  }}
+                  className={cn(
+                    "rounded-full px-4 py-2 text-sm font-semibold transition",
+                    tab === item.id ? "bg-blush text-white shadow-card" : "text-muted hover:text-ink",
+                  )}
+                >
+                  {item.label}
+                </button>
+              </Tooltip>
             ))}
           </nav>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              if (!transactions.length) void runGenerate();
-              else void runEvaluate();
-            }}
-            disabled={loading !== null}
-            className="rounded-full"
-          >
+          <Tooltip content={!transactions.length ? tip("runCtaGenerate") : tip("runCtaEvaluate")}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (!transactions.length) void runGenerate();
+                else void runEvaluate();
+              }}
+              disabled={loading !== null}
+              className="rounded-full"
+            >
             {!transactions.length ? (
               <>
                 <Plus className="h-4 w-4" />
@@ -540,6 +589,7 @@ export function FraudLab() {
               </>
             )}
           </Button>
+          </Tooltip>
         </div>
 
         {error ? (
@@ -553,17 +603,19 @@ export function FraudLab() {
         ) : null}
 
         {policyDirty ? (
-          <div
-            data-testid="fraud-policy-dirty"
-            className="mb-4 rounded-2xl border border-lilac/40 bg-lilac/15 px-4 py-3 text-xs leading-relaxed text-ink"
-            role="status"
-            aria-live="polite"
-          >
+          <Tooltip content={tip("policyDirty")} wide className="mb-4 block">
+            <div
+              data-testid="fraud-policy-dirty"
+              className="rounded-2xl border border-lilac/40 bg-lilac/15 px-4 py-3 text-xs leading-relaxed text-ink"
+              role="status"
+              aria-live="polite"
+            >
             Policy or cost inputs changed since the last evaluate. Scored table and holdout metrics
             still reflect the previous thresholds — run{" "}
             <span className="font-bold">Train · Calibrate · Evaluate</span> again before inspecting
-            evidence.
-          </div>
+              evidence.
+            </div>
+          </Tooltip>
         ) : null}
 
         {tab === "dashboard" || tab === "policy" || tab === "evidence" ? (
@@ -585,7 +637,11 @@ export function FraudLab() {
               <div data-testid="fraud-evidence" className="grid gap-4 lg:grid-cols-3">
                 <Card className="overflow-hidden bg-grad-coral text-white lg:col-span-1">
                   <CardHeader>
-                    <CardTitle className="text-white/90">Risk Probability</CardTitle>
+                    <CardTitle className="text-white/90">
+                      <TipTitle tip={tip("riskProbability")} className="text-white/90">
+                        Risk Probability
+                      </TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="font-display text-4xl font-bold">
@@ -599,7 +655,9 @@ export function FraudLab() {
                 </Card>
                 <Card className="lg:col-span-1">
                   <CardHeader>
-                    <CardTitle>Decision</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("decision")}>Decision</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div
@@ -617,7 +675,9 @@ export function FraudLab() {
                 </Card>
                 <Card className="lg:col-span-1">
                   <CardHeader>
-                    <CardTitle>Transaction</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("transaction")}>Transaction</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1 text-sm">
                     <div className="font-semibold">{evidence.transaction_id}</div>
@@ -636,13 +696,13 @@ export function FraudLab() {
 
             <div className="flex items-stretch gap-3 overflow-x-auto pb-1">
               {metricCards.map((card) => (
-                <div
-                  key={card.label}
-                  className={cn(
-                    "relative min-h-[200px] min-w-[200px] flex-1 overflow-hidden rounded-[1.75rem] p-5 text-white shadow-lift",
-                    card.gradient,
-                  )}
-                >
+                <Tooltip key={card.label} content={tip(card.tipKey)} wide className="min-w-[200px] flex-1">
+                  <div
+                    className={cn(
+                      "relative min-h-[200px] overflow-hidden rounded-[1.75rem] p-5 text-white shadow-lift",
+                      card.gradient,
+                    )}
+                  >
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/25 font-display text-lg font-bold backdrop-blur-sm">
                     {card.icon}
                   </div>
@@ -651,60 +711,71 @@ export function FraudLab() {
                   <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-white/75">
                     {card.label}
                   </div>
-                </div>
+                  </div>
+                </Tooltip>
               ))}
-              <button
-                type="button"
-                onClick={() => setTab("transactions")}
-                className="flex h-[200px] w-12 shrink-0 items-center justify-center self-center rounded-full bg-white/80 text-ink shadow-card transition hover:bg-white"
-                aria-label="View transactions"
-              >
-                <ArrowRight className="h-5 w-5" />
-              </button>
+              <Tooltip content={tip("scoredTable")}>
+                <button
+                  type="button"
+                  onClick={() => setTab("transactions")}
+                  className="flex h-[200px] w-12 shrink-0 items-center justify-center self-center rounded-full bg-white/80 text-ink shadow-card transition hover:bg-white"
+                  aria-label="View transactions"
+                >
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </Tooltip>
             </div>
 
             <div className="grid flex-1 gap-4 lg:grid-cols-2">
               <Card className="bg-white/95">
                 <CardHeader>
-                  <CardTitle>Holdout balance</CardTitle>
+                  <CardTitle>
+                    <TipTitle tip={tip("holdoutBalance")}>Holdout balance</TipTitle>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {evalBlock ? (
                     <div data-testid="fraud-holdout-metrics" className="space-y-4">
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {(
-                          [
-                            ["PR-AUC", evalBlock.pr_auc.toFixed(4)],
-                            ["Precision", formatPct(evalBlock.precision)],
-                            ["Recall", formatPct(evalBlock.recall)],
-                            ["F1", evalBlock.f1.toFixed(4)],
-                            ["Brier", evalBlock.brier_score.toFixed(4)],
-                            ["FPR", formatPct(evalBlock.false_positive_rate)],
-                            ["FNR", formatPct(evalBlock.false_negative_rate)],
-                            ["Expected cost", evalBlock.expected_cost.toFixed(2)],
-                            ["Review rate", formatPct(evalBlock.review_rate)],
-                            ["Prevalence", formatPct(evalBlock.prevalence)],
-                          ] as const
-                        ).map(([label, value]) => (
-                          <div key={label} className="rounded-2xl bg-soft/80 p-3">
-                            <div className="text-[11px] font-medium text-muted">{label}</div>
-                            <div className="mt-1 font-display text-lg font-bold">{value}</div>
-                          </div>
-                        ))}
+                        {HOLDOUT_METRICS.map(({ label, tipKey }) => {
+                          const valueMap: Record<string, string> = {
+                            "PR-AUC": evalBlock.pr_auc.toFixed(4),
+                            Precision: formatPct(evalBlock.precision),
+                            Recall: formatPct(evalBlock.recall),
+                            F1: evalBlock.f1.toFixed(4),
+                            Brier: evalBlock.brier_score.toFixed(4),
+                            FPR: formatPct(evalBlock.false_positive_rate),
+                            FNR: formatPct(evalBlock.false_negative_rate),
+                            "Expected cost": evalBlock.expected_cost.toFixed(2),
+                            "Review rate": formatPct(evalBlock.review_rate),
+                            Prevalence: formatPct(evalBlock.prevalence),
+                          };
+                          return (
+                            <MetricTile
+                              key={label}
+                              label={label}
+                              value={valueMap[label]}
+                              tip={tip(tipKey)}
+                            />
+                          );
+                        })}
                       </div>
+                      <TipText tip={tip("decisionMix")} className="mb-1 block text-[11px] font-medium text-muted">
+                        Decision mix (holdout)
+                      </TipText>
                       <DecisionRateBars
                         allowRate={evalBlock.allow_rate}
                         reviewRate={evalBlock.review_rate}
                         blockRate={evalBlock.block_rate}
                       />
                       {meta ? (
-                        <p className="text-xs text-muted">
+                        <TipText tip={tip("holdoutSplitNote")} className="text-xs text-muted">
                           Temporal holdout · train {meta.n_train.toLocaleString()}
                           {meta.n_calibration != null
                             ? ` (fit ${meta.n_model_fit?.toLocaleString()} / cal ${meta.n_calibration.toLocaleString()})`
                             : ""}
                           {" · "}holdout {meta.n_test.toLocaleString()} · seed {meta.seed}
-                        </p>
+                        </TipText>
                       ) : null}
                     </div>
                   ) : (
@@ -717,7 +788,9 @@ export function FraudLab() {
 
               <Card className="bg-white/95">
                 <CardHeader>
-                  <CardTitle>Recent transactions</CardTitle>
+                  <CardTitle>
+                    <TipTitle tip={tip("recentTransactions")}>Recent transactions</TipTitle>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {filteredScored.length ? (
@@ -778,7 +851,9 @@ export function FraudLab() {
               <div className="grid gap-4 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Confusion Matrix</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("confusionMatrix")}>Confusion Matrix</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ConfusionMatrixBlock matrix={evalBlock.confusion_matrix} />
@@ -786,7 +861,9 @@ export function FraudLab() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Precision–Recall</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("prChart")}>Precision–Recall</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <PrecisionRecallChart data={evalBlock.precision_recall_curve} />
@@ -794,7 +871,9 @@ export function FraudLab() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Calibration</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("calibrationChart")}>Calibration</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <CalibrationChart data={evalBlock.calibration_curve} />
@@ -802,7 +881,9 @@ export function FraudLab() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Threshold / Cost</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("thresholdCostChart")}>Threshold / Cost</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ThresholdCostChart sweep={evalBlock.threshold_cost_analysis.sweep} />
@@ -846,12 +927,16 @@ export function FraudLab() {
             <h1 className="font-display text-3xl font-bold tracking-tight">Transactions</h1>
             <Card>
               <CardHeader>
-                <CardTitle>Scored Transactions</CardTitle>
+                <CardTitle>
+                  <TipTitle tip={tip("scoredTable")}>Scored Transactions</TipTitle>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="min-w-[220px] flex-1">
-                    <Label htmlFor="tx">Transaction id</Label>
+                    <TipLabel htmlFor="tx" tip={tip("transactionId")}>
+                      Transaction id
+                    </TipLabel>
                     <Input
                       id="tx"
                       value={selectedId}
@@ -859,25 +944,39 @@ export function FraudLab() {
                       placeholder="TX-000123"
                     />
                   </div>
-                  <Button
-                    onClick={() => runAnalyze(selectedId || undefined)}
-                    disabled={loading !== null || !transactions.length}
-                    variant="accent"
-                  >
-                    {loading === "analyze" ? "Analyzing…" : "Inspect Evidence"}
-                  </Button>
+                  <Tooltip content={tip("inspectEvidence")}>
+                    <Button
+                      onClick={() => runAnalyze(selectedId || undefined)}
+                      disabled={loading !== null || !transactions.length}
+                      variant="accent"
+                    >
+                      {loading === "analyze" ? "Analyzing…" : "Inspect Evidence"}
+                    </Button>
+                  </Tooltip>
                 </div>
                 {filteredScored.length ? (
                   <div className="max-h-[480px] overflow-auto rounded-2xl">
                     <table className="min-w-full border-collapse text-sm">
                       <thead>
                         <tr className="border-b border-soft text-left text-xs font-semibold uppercase tracking-wider text-muted">
-                          <th className="py-3 pr-3">Id</th>
-                          <th className="py-3 pr-3">Split</th>
-                          <th className="py-3 pr-3">Label</th>
-                          <th className="py-3 pr-3">Risk</th>
-                          <th className="py-3 pr-3">Decision</th>
-                          <th className="py-3">Inspect</th>
+                          <th className="py-3 pr-3">
+                            <TipText tip={tip("colId")}>Id</TipText>
+                          </th>
+                          <th className="py-3 pr-3">
+                            <TipText tip={tip("colSplit")}>Split</TipText>
+                          </th>
+                          <th className="py-3 pr-3">
+                            <TipText tip={tip("colLabel")}>Label</TipText>
+                          </th>
+                          <th className="py-3 pr-3">
+                            <TipText tip={tip("colRisk")}>Risk</TipText>
+                          </th>
+                          <th className="py-3 pr-3">
+                            <TipText tip={tip("colDecision")}>Decision</TipText>
+                          </th>
+                          <th className="py-3">
+                            <TipText tip={tip("colInspect")}>Inspect</TipText>
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -936,7 +1035,11 @@ export function FraudLab() {
               <div className="grid gap-4 lg:grid-cols-3">
                 <Card className="overflow-hidden bg-grad-coral text-white">
                   <CardHeader>
-                    <CardTitle className="text-white/90">Risk Probability</CardTitle>
+                    <CardTitle className="text-white/90">
+                      <TipTitle tip={tip("riskProbability")} className="text-white/90">
+                        Risk Probability
+                      </TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="font-display text-4xl font-bold">
@@ -950,7 +1053,9 @@ export function FraudLab() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Decision</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("decision")}>Decision</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div
@@ -968,7 +1073,9 @@ export function FraudLab() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Transaction</CardTitle>
+                    <CardTitle>
+                      <TipTitle tip={tip("transaction")}>Transaction</TipTitle>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1 text-sm">
                     <div className="font-semibold">{evidence.transaction_id}</div>
@@ -987,7 +1094,9 @@ export function FraudLab() {
             <div className="grid gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Feature Evidence</CardTitle>
+                  <CardTitle>
+                    <TipTitle tip={tip("featureEvidence")}>Feature Evidence</TipTitle>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {evidence ? (
@@ -995,9 +1104,15 @@ export function FraudLab() {
                       <table className="min-w-full border-collapse text-sm">
                         <thead>
                           <tr className="border-b border-soft text-left text-xs font-semibold uppercase tracking-wider text-muted">
-                            <th className="py-2 pr-2">Feature</th>
-                            <th className="py-2 pr-2">Value</th>
-                            <th className="py-2">Effect</th>
+                            <th className="py-2 pr-2">
+                              <TipText tip={tip("featureCol")}>Feature</TipText>
+                            </th>
+                            <th className="py-2 pr-2">
+                              <TipText tip={tip("valueCol")}>Value</TipText>
+                            </th>
+                            <th className="py-2">
+                              <TipText tip={tip("effectCol")}>Effect</TipText>
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1027,34 +1142,32 @@ export function FraudLab() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Model</CardTitle>
+                  <CardTitle>
+                    <TipTitle tip={tip("modelPanel")}>Model</TipTitle>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-2xl bg-soft/80 p-3">
-                      <div className="text-[11px] font-medium text-muted">EBM</div>
-                      <div className="mt-1 font-display font-bold">
-                        {evaluation?.model_version ?? analysis?.model_version ?? "ebm-v1"}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-soft/80 p-3">
-                      <div className="text-[11px] font-medium text-muted">Calibration</div>
-                      <div className="mt-1 font-display font-bold">
-                        {evaluation?.calibration_method ?? analysis?.calibration_method ?? "—"}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-soft/80 p-3">
-                      <div className="text-[11px] font-medium text-muted">PR-AUC</div>
-                      <div className="mt-1 font-display font-bold">
-                        {evalBlock ? evalBlock.pr_auc.toFixed(4) : "—"}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-soft/80 p-3">
-                      <div className="text-[11px] font-medium text-muted">Brier</div>
-                      <div className="mt-1 font-display font-bold">
-                        {evalBlock ? evalBlock.brier_score.toFixed(4) : "—"}
-                      </div>
-                    </div>
+                    <MetricTile
+                      label="EBM"
+                      value={evaluation?.model_version ?? analysis?.model_version ?? "ebm-v1"}
+                      tip={tip("ebm")}
+                    />
+                    <MetricTile
+                      label="Calibration"
+                      value={evaluation?.calibration_method ?? analysis?.calibration_method ?? "—"}
+                      tip={tip("calibration")}
+                    />
+                    <MetricTile
+                      label="PR-AUC"
+                      value={evalBlock ? evalBlock.pr_auc.toFixed(4) : "—"}
+                      tip={tip("prAuc")}
+                    />
+                    <MetricTile
+                      label="Brier"
+                      value={evalBlock ? evalBlock.brier_score.toFixed(4) : "—"}
+                      tip={tip("brier")}
+                    />
                   </div>
                   <div className="rounded-2xl bg-soft/60 p-3 text-xs leading-relaxed text-muted">
                     Accuracy is not the primary metric. Fraud is rare; PR-AUC, calibration, and
@@ -1070,7 +1183,9 @@ export function FraudLab() {
         {tab === "dashboard" && transactions.length > 0 ? (
           <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-soft/80 pt-4">
             <div className="min-w-[220px] flex-1">
-              <Label htmlFor="tx-dash">Transaction id</Label>
+              <TipLabel htmlFor="tx-dash" tip={tip("transactionId")}>
+                Transaction id
+              </TipLabel>
               <Input
                 id="tx-dash"
                 value={selectedId}
@@ -1078,13 +1193,15 @@ export function FraudLab() {
                 placeholder="TX-000123"
               />
             </div>
-            <Button
-              onClick={() => runAnalyze(selectedId || undefined)}
-              disabled={loading !== null || !transactions.length}
-              variant="accent"
-            >
-              {loading === "analyze" ? "Analyzing…" : "Inspect Evidence"}
-            </Button>
+            <Tooltip content={tip("inspectEvidence")}>
+              <Button
+                onClick={() => runAnalyze(selectedId || undefined)}
+                disabled={loading !== null || !transactions.length}
+                variant="accent"
+              >
+                {loading === "analyze" ? "Analyzing…" : "Inspect Evidence"}
+              </Button>
+            </Tooltip>
           </div>
         ) : null}
       </section>
