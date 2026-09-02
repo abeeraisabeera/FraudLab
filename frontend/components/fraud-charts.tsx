@@ -17,6 +17,14 @@ import {
 
 import type { FraudEvaluation } from "@/lib/fraud-types";
 
+const AXIS = "#6b6b80";
+const GRID = "#e8dff0";
+const INK = "#1a1a2e";
+const BLUSH = "#ff8fab";
+const VIOLET = "#8b5cf6";
+const MINT = "#34d399";
+const MUTED = "#94a3b8";
+
 function ChartFrame({
   label,
   children,
@@ -40,7 +48,7 @@ export function PrecisionRecallChart({
   data: FraudEvaluation["precision_recall_curve"];
 }) {
   if (!data.length) {
-    return <p className="text-xs text-stone-600">Insufficient positives for a PR curve.</p>;
+    return <p className="text-xs text-muted">Insufficient positives for a PR curve.</p>;
   }
   return (
     <ChartFrame
@@ -69,11 +77,11 @@ export function PrecisionRecallChart({
     >
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="2 2" stroke="#8f8a7b" />
-          <XAxis dataKey="recall" stroke="#111111" domain={[0, 1]} type="number" />
-          <YAxis dataKey="precision" stroke="#111111" domain={[0, 1]} type="number" />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+          <XAxis dataKey="recall" stroke={AXIS} domain={[0, 1]} type="number" />
+          <YAxis dataKey="precision" stroke={AXIS} domain={[0, 1]} type="number" />
           <Tooltip />
-          <Line type="monotone" dataKey="precision" stroke="#1d3328" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="precision" stroke={VIOLET} strokeWidth={2.5} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </ChartFrame>
@@ -82,7 +90,7 @@ export function PrecisionRecallChart({
 
 export function CalibrationChart({ data }: { data: FraudEvaluation["calibration_curve"] }) {
   if (!data.length) {
-    return <p className="text-xs text-stone-600">Calibration curve unavailable for this fold.</p>;
+    return <p className="text-xs text-muted">Calibration curve unavailable for this fold.</p>;
   }
   const diagonal = [
     { mean_predicted_probability: 0, fraction_positive: 0 },
@@ -115,21 +123,21 @@ export function CalibrationChart({ data }: { data: FraudEvaluation["calibration_
     >
       <ResponsiveContainer width="100%" height={240}>
         <LineChart>
-          <CartesianGrid strokeDasharray="2 2" stroke="#8f8a7b" />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
           <XAxis
             dataKey="mean_predicted_probability"
             type="number"
             domain={[0, 1]}
-            stroke="#111111"
+            stroke={AXIS}
             allowDuplicatedCategory={false}
           />
-          <YAxis dataKey="fraction_positive" type="number" domain={[0, 1]} stroke="#111111" />
+          <YAxis dataKey="fraction_positive" type="number" domain={[0, 1]} stroke={AXIS} />
           <Tooltip />
           <Line
             data={diagonal}
             type="linear"
             dataKey="fraction_positive"
-            stroke="#8f8a7b"
+            stroke={MUTED}
             strokeDasharray="4 4"
             dot={false}
             name="perfect"
@@ -138,8 +146,8 @@ export function CalibrationChart({ data }: { data: FraudEvaluation["calibration_
             data={data}
             type="monotone"
             dataKey="fraction_positive"
-            stroke="#9c6f2c"
-            strokeWidth={2}
+            stroke={BLUSH}
+            strokeWidth={2.5}
             name="model"
           />
         </LineChart>
@@ -154,10 +162,10 @@ export function ConfusionMatrixBlock({
   matrix: FraudEvaluation["confusion_matrix"];
 }) {
   const cells = [
-    { label: "TN", value: matrix.tn, tone: "bg-stone-100" },
-    { label: "FP", value: matrix.fp, tone: "bg-[#f3e7d3]" },
-    { label: "FN", value: matrix.fn, tone: "bg-[#f3e7d3]" },
-    { label: "TP", value: matrix.tp, tone: "bg-stone-100" },
+    { label: "TN", value: matrix.tn, tone: "bg-soft" },
+    { label: "FP", value: matrix.fp, tone: "bg-blush/15" },
+    { label: "FN", value: matrix.fn, tone: "bg-blush/15" },
+    { label: "TP", value: matrix.tp, tone: "bg-mint/20" },
   ];
   return (
     <div
@@ -166,9 +174,9 @@ export function ConfusionMatrixBlock({
       aria-label={`Confusion matrix TN ${matrix.tn}, FP ${matrix.fp}, FN ${matrix.fn}, TP ${matrix.tp}`}
     >
       {cells.map((cell) => (
-        <div key={cell.label} className={`border border-ink p-3 ${cell.tone}`} role="cell">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-stone-600">{cell.label}</div>
-          <div className="mt-1 text-xl font-bold">{cell.value}</div>
+        <div key={cell.label} className={`rounded-2xl p-3 ${cell.tone}`} role="cell">
+          <div className="text-[11px] font-medium text-muted">{cell.label}</div>
+          <div className="mt-1 font-display text-xl font-bold">{cell.value}</div>
         </div>
       ))}
     </div>
@@ -181,7 +189,7 @@ export function ThresholdCostChart({
   sweep: FraudEvaluation["threshold_cost_analysis"]["sweep"];
 }) {
   if (!sweep.length) {
-    return <p className="text-xs text-stone-600">No threshold sweep points.</p>;
+    return <p className="text-xs text-muted">No threshold sweep points.</p>;
   }
   const byReview = new Map<number, number>();
   for (const row of sweep) {
@@ -219,11 +227,11 @@ export function ThresholdCostChart({
     >
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="2 2" stroke="#8f8a7b" />
-          <XAxis dataKey="review_threshold" stroke="#111111" />
-          <YAxis stroke="#111111" />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+          <XAxis dataKey="review_threshold" stroke={AXIS} />
+          <YAxis stroke={AXIS} />
           <Tooltip />
-          <Bar dataKey="expected_cost" fill="#1d3328" />
+          <Bar dataKey="expected_cost" fill={BLUSH} radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFrame>
@@ -244,7 +252,7 @@ export function DecisionRateBars({
     { name: "REVIEW", value: reviewRate },
     { name: "BLOCK", value: blockRate },
   ];
-  const colors = ["#1d3328", "#9c6f2c", "#4b5563"];
+  const colors = [MINT, BLUSH, INK];
   return (
     <ChartFrame
       label="Decision rate bars for ALLOW, REVIEW, and BLOCK"
@@ -270,16 +278,16 @@ export function DecisionRateBars({
     >
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="2 2" stroke="#8f8a7b" />
-          <XAxis dataKey="name" stroke="#111111" />
-          <YAxis stroke="#111111" domain={[0, 1]} />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+          <XAxis dataKey="name" stroke={AXIS} />
+          <YAxis stroke={AXIS} domain={[0, 1]} />
           <Tooltip />
-          <Bar dataKey="value">
+          <Bar dataKey="value" radius={[8, 8, 0, 0]}>
             {data.map((entry, index) => (
               <Cell key={entry.name} fill={colors[index % colors.length]} />
             ))}
           </Bar>
-          <ReferenceLine y={0} stroke="#111111" />
+          <ReferenceLine y={0} stroke={AXIS} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFrame>

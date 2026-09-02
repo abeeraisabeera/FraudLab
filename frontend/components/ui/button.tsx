@@ -7,18 +7,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center border border-ink px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blush/60 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-olive text-paper hover:bg-amber",
-        secondary: "bg-paper text-ink hover:bg-stone-200",
-        ghost: "bg-transparent text-ink hover:bg-stone-200",
+        default: "bg-ink text-white shadow-card hover:bg-ink/90",
+        secondary: "bg-white/80 text-ink shadow-card hover:bg-white",
+        soft: "bg-blush/20 text-ink hover:bg-blush/30",
+        ghost: "bg-transparent text-ink hover:bg-white/50",
+        accent: "bg-blush text-white shadow-card hover:bg-rose",
       },
       size: {
-        default: "h-10",
-        sm: "h-8 px-2",
-        lg: "h-11 px-5",
+        default: "h-11",
+        sm: "h-9 rounded-xl px-3 text-xs",
+        lg: "h-12 px-5",
+        icon: "h-11 w-11 rounded-2xl p-0",
       },
     },
     defaultVariants: {
@@ -28,7 +31,9 @@ const buttonVariants = cva(
   },
 );
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

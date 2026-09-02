@@ -1,0 +1,1208 @@
+{
+  "run_at": "2026-09-02T10:29:33.119550+00:00",
+  "api_base": "http://127.0.0.1:8000",
+  "scenarios": [
+    {
+      "name": "health_check",
+      "ok": true,
+      "elapsed_ms": 1527,
+      "error": null,
+      "result": {
+        "health": {
+          "status": "ok",
+          "version": "1.0.0",
+          "limits": {
+            "rate_limit_per_min": 120,
+            "api_key_required": false
+          }
+        }
+      }
+    },
+    {
+      "name": "default_policy",
+      "ok": true,
+      "elapsed_ms": 6,
+      "error": null,
+      "result": {
+        "policy": {
+          "policy": {
+            "version": "policy-v1",
+            "allow_threshold": 0.2,
+            "review_threshold": 0.55,
+            "block_threshold": 0.55,
+            "mapping": {
+              "LOW_RISK": "ALLOW",
+              "MEDIUM_RISK": "REVIEW",
+              "HIGH_RISK": "BLOCK"
+            }
+          },
+          "costs": {
+            "false_positive_cost": 5.0,
+            "false_negative_cost": 100.0,
+            "review_cost": 2.0,
+            "charge_false_negative_on_review": false
+          },
+          "notes": {
+            "principle": "Evidence before automation.",
+            "model_role": "Predict risk probability.",
+            "policy_role": "Map probability to ALLOW / REVIEW / BLOCK."
+          }
+        }
+      }
+    },
+    {
+      "name": "generate_default",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "count": 2500,
+        "users": 300,
+        "requested_fraud_rate": 0.04,
+        "realized_fraud_rate": 0.04,
+        "fraud_count": 100,
+        "sample_tx": "TX-001207"
+      }
+    },
+    {
+      "name": "generate_low_fraud_rate",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "count": 1500,
+        "users": 200,
+        "requested_fraud_rate": 0.01,
+        "realized_fraud_rate": 0.01,
+        "fraud_count": 15,
+        "sample_tx": "TX-001323"
+      }
+    },
+    {
+      "name": "generate_high_fraud_rate",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "count": 1500,
+        "users": 200,
+        "requested_fraud_rate": 0.15,
+        "realized_fraud_rate": 0.15,
+        "fraud_count": 225,
+        "sample_tx": "TX-000060"
+      }
+    },
+    {
+      "name": "generate_same_seed_reproducible",
+      "ok": true,
+      "elapsed_ms": 1,
+      "error": null,
+      "result": {
+        "first_sample": "TX-001207",
+        "repeat_sample": "TX-001207",
+        "identical": true
+      }
+    },
+    {
+      "name": "generate_different_seed",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "seed_42_sample": "TX-001207",
+        "seed_99_sample": "TX-000047",
+        "identical": false
+      }
+    },
+    {
+      "name": "evaluate_default_policy",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "pr_auc": 0.2424,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "brier": 0.0321,
+        "expected_cost": 1670.0,
+        "allow_rate": 0.9533,
+        "review_rate": 0.0467,
+        "block_rate": 0.0,
+        "confusion": {
+          "tn": 699,
+          "fp": 0,
+          "fn": 16,
+          "tp": 0
+        },
+        "holdout_n": 750,
+        "train_n": 1750,
+        "top_risk": "TX-001824",
+        "top_risk_score": 0.5
+      }
+    },
+    {
+      "name": "evaluate_strict_policy",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "pr_auc": 0.2424,
+        "precision": 0.3571,
+        "recall": 0.5,
+        "f1": 0.4167,
+        "brier": 0.0321,
+        "expected_cost": 955.0,
+        "allow_rate": 0.708,
+        "review_rate": 0.2733,
+        "block_rate": 0.0187,
+        "confusion": {
+          "tn": 526,
+          "fp": 9,
+          "fn": 5,
+          "tp": 5
+        },
+        "holdout_n": 750,
+        "train_n": 1750,
+        "top_risk": "TX-001824",
+        "top_risk_score": 0.5
+      }
+    },
+    {
+      "name": "evaluate_loose_policy",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "pr_auc": 0.2424,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "brier": 0.0321,
+        "expected_cost": 2422.0,
+        "allow_rate": 0.9853,
+        "review_rate": 0.0147,
+        "block_rate": 0.0,
+        "confusion": {
+          "tn": 715,
+          "fp": 0,
+          "fn": 24,
+          "tp": 0
+        },
+        "holdout_n": 750,
+        "train_n": 1750,
+        "top_risk": "TX-001824",
+        "top_risk_score": 0.5
+      }
+    },
+    {
+      "name": "evaluate_high_fn_cost",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "pr_auc": 0.2424,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "brier": 0.0321,
+        "expected_cost": 8070.0,
+        "allow_rate": 0.9533,
+        "review_rate": 0.0467,
+        "block_rate": 0.0,
+        "confusion": {
+          "tn": 699,
+          "fp": 0,
+          "fn": 16,
+          "tp": 0
+        },
+        "holdout_n": 750,
+        "train_n": 1750,
+        "top_risk": "TX-001824",
+        "top_risk_score": 0.5,
+        "best_thresholds": {
+          "allow_threshold": 0.05,
+          "review_threshold": 0.55,
+          "expected_cost": 2938.0,
+          "expected_cost_per_transaction": 3.917333333333333,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "review_rate": 0.292,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 1.0,
+          "tp": 0,
+          "fp": 0,
+          "tn": 526,
+          "fn": 5,
+          "reviews": 219.0,
+          "decision_counts": {
+            "ALLOW": 531,
+            "REVIEW": 219,
+            "BLOCK": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_highest_risk_tx",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "transaction_id": "TX-001824",
+        "decision": "REVIEW",
+        "risk_probability": 0.5,
+        "top_features": [
+          {
+            "feature": "account_age_days",
+            "contribution": 1.2345
+          },
+          {
+            "feature": "failed_attempts",
+            "contribution": 0.4669
+          },
+          {
+            "feature": "account_age_days & previous_chargebacks",
+            "contribution": 0.4042
+          }
+        ]
+      }
+    },
+    {
+      "name": "analyze_lowest_risk_tx",
+      "ok": true,
+      "elapsed_ms": 0,
+      "error": null,
+      "result": {
+        "transaction_id": "TX-001667",
+        "decision": "ALLOW",
+        "risk_probability": 0.0,
+        "top_features": [
+          {
+            "feature": "amount_vs_user_median & account_age_days",
+            "contribution": 0.0533
+          },
+          {
+            "feature": "time_since_previous_transaction & account_age_days",
+            "contribution": 0.0464
+          },
+          {
+            "feature": "amount_zscore_user & ip_user_count",
+            "contribution": 0.042
+          }
+        ]
+      }
+    },
+    {
+      "name": "error_evaluate_too_few_tx",
+      "ok": true,
+      "elapsed_ms": 8,
+      "error": null,
+      "result": {
+        "status": 422,
+        "error": {
+          "detail": [
+            {
+              "type": "too_short",
+              "loc": [
+                "body",
+                "transactions"
+              ],
+              "msg": "List should have at least 50 items after validation, not 40",
+              "input": [
+                {
+                  "transaction_id": "TX-000082",
+                  "user_id": "U-00027",
+                  "timestamp": "2025-01-01T00:17:57+00:00",
+                  "amount": 120.54,
+                  "currency": "USD",
+                  "merchant_id": "M-GRO-021",
+                  "merchant_category": "grocery",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00027",
+                  "ip_address": "203.0.113.8",
+                  "country": "CA",
+                  "billing_country": "CA",
+                  "account_age_days": 1941,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000113",
+                  "user_id": "U-00027",
+                  "timestamp": "2025-01-01T00:18:55+00:00",
+                  "amount": 1100.67,
+                  "currency": "USD",
+                  "merchant_id": "M-TRA-017",
+                  "merchant_category": "travel",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00027",
+                  "ip_address": "203.0.113.8",
+                  "country": "CA",
+                  "billing_country": "CA",
+                  "account_age_days": 1941,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000395",
+                  "user_id": "U-00008",
+                  "timestamp": "2025-01-01T00:21:53+00:00",
+                  "amount": 30.69,
+                  "currency": "EUR",
+                  "merchant_id": "M-FUE-062",
+                  "merchant_category": "fuel",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-SHARED-003",
+                  "ip_address": "198.51.100.8",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 3444,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "UK",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000199",
+                  "user_id": "U-00012",
+                  "timestamp": "2025-01-01T00:22:03+00:00",
+                  "amount": 251.05,
+                  "currency": "EUR",
+                  "merchant_id": "M-TRA-065",
+                  "merchant_category": "travel",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00012",
+                  "ip_address": "198.51.100.12",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2742,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000020",
+                  "user_id": "U-00018",
+                  "timestamp": "2025-01-01T01:55:28+00:00",
+                  "amount": 85.57,
+                  "currency": "EUR",
+                  "merchant_id": "M-RET-034",
+                  "merchant_category": "retail",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-NEW-6524",
+                  "ip_address": "198.51.100.18",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 3422,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000239",
+                  "user_id": "U-00035",
+                  "timestamp": "2025-01-01T02:16:00+00:00",
+                  "amount": 492.63,
+                  "currency": "EUR",
+                  "merchant_id": "M-ATM-055",
+                  "merchant_category": "atm",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00035",
+                  "ip_address": "198.51.100.35",
+                  "country": "ES",
+                  "billing_country": "UK",
+                  "account_age_days": 1083,
+                  "failed_attempts": 2,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "US",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000400",
+                  "user_id": "U-00037",
+                  "timestamp": "2025-01-01T02:49:06+00:00",
+                  "amount": 89.77,
+                  "currency": "USD",
+                  "merchant_id": "M-UTI-065",
+                  "merchant_category": "utilities",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00037",
+                  "ip_address": "198.51.100.37",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 1355,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000456",
+                  "user_id": "U-00037",
+                  "timestamp": "2025-01-01T04:00:41+00:00",
+                  "amount": 364.83,
+                  "currency": "USD",
+                  "merchant_id": "M-ATM-003",
+                  "merchant_category": "atm",
+                  "payment_method": "ach",
+                  "device_id": "DEV-NEW-5809",
+                  "ip_address": "198.51.100.37",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 1355,
+                  "failed_attempts": 3,
+                  "previous_chargebacks": 1,
+                  "shipping_country": "US",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000342",
+                  "user_id": "U-00047",
+                  "timestamp": "2025-01-01T04:01:00+00:00",
+                  "amount": 54.57,
+                  "currency": "USD",
+                  "merchant_id": "M-RET-078",
+                  "merchant_category": "retail",
+                  "payment_method": "ach",
+                  "device_id": "DEV-SHARED-011",
+                  "ip_address": "198.51.100.47",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 455,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 1,
+                  "shipping_country": "US",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000076",
+                  "user_id": "U-00029",
+                  "timestamp": "2025-01-01T04:04:08+00:00",
+                  "amount": 27.86,
+                  "currency": "USD",
+                  "merchant_id": "M-SUB-026",
+                  "merchant_category": "subscription",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00029",
+                  "ip_address": "198.51.100.29",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 2872,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000340",
+                  "user_id": "U-00006",
+                  "timestamp": "2025-01-01T04:06:00+00:00",
+                  "amount": 387.02,
+                  "currency": "EUR",
+                  "merchant_id": "M-ATM-027",
+                  "merchant_category": "atm",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00006",
+                  "ip_address": "198.51.100.6",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2618,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000154",
+                  "user_id": "U-00037",
+                  "timestamp": "2025-01-01T06:22:10+00:00",
+                  "amount": 87.79,
+                  "currency": "USD",
+                  "merchant_id": "M-ATM-057",
+                  "merchant_category": "atm",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-SHARED-011",
+                  "ip_address": "198.51.100.37",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 1355,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000187",
+                  "user_id": "U-00031",
+                  "timestamp": "2025-01-01T07:32:43+00:00",
+                  "amount": 173.35,
+                  "currency": "EUR",
+                  "merchant_id": "M-UTI-073",
+                  "merchant_category": "utilities",
+                  "payment_method": "ach",
+                  "device_id": "DEV-NEW-7018",
+                  "ip_address": "185.220.24.6",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 2894,
+                  "failed_attempts": 2,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000318",
+                  "user_id": "U-00034",
+                  "timestamp": "2025-01-01T08:19:48+00:00",
+                  "amount": 649.94,
+                  "currency": "EUR",
+                  "merchant_id": "M-ELE-056",
+                  "merchant_category": "electronics",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-NEW-7845",
+                  "ip_address": "198.51.100.34",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 3155,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000301",
+                  "user_id": "U-00028",
+                  "timestamp": "2025-01-01T08:45:12+00:00",
+                  "amount": 38.16,
+                  "currency": "EUR",
+                  "merchant_id": "M-RES-051",
+                  "merchant_category": "restaurant",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00028",
+                  "ip_address": "198.51.100.28",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 460,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000284",
+                  "user_id": "U-00026",
+                  "timestamp": "2025-01-01T08:58:10+00:00",
+                  "amount": 59.35,
+                  "currency": "EUR",
+                  "merchant_id": "M-RES-028",
+                  "merchant_category": "restaurant",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00026",
+                  "ip_address": "198.51.100.26",
+                  "country": "ES",
+                  "billing_country": "IT",
+                  "account_age_days": 3088,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "ES",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000294",
+                  "user_id": "U-00026",
+                  "timestamp": "2025-01-01T09:01:02+00:00",
+                  "amount": 1055.34,
+                  "currency": "EUR",
+                  "merchant_id": "M-TRA-011",
+                  "merchant_category": "transfer",
+                  "payment_method": "wallet",
+                  "device_id": "DEV-SHARED-001",
+                  "ip_address": "198.51.100.26",
+                  "country": "UK",
+                  "billing_country": "CA",
+                  "account_age_days": 3088,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 1,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000091",
+                  "user_id": "U-00022",
+                  "timestamp": "2025-01-01T09:06:01+00:00",
+                  "amount": 576.42,
+                  "currency": "USD",
+                  "merchant_id": "M-TRA-013",
+                  "merchant_category": "transfer",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-NEW-6813",
+                  "ip_address": "198.51.100.22",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 456,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000259",
+                  "user_id": "U-00045",
+                  "timestamp": "2025-01-01T10:55:42+00:00",
+                  "amount": 1385.1,
+                  "currency": "EUR",
+                  "merchant_id": "M-TRA-051",
+                  "merchant_category": "transfer",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00045",
+                  "ip_address": "198.51.100.45",
+                  "country": "CA",
+                  "billing_country": "DE",
+                  "account_age_days": 2770,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000293",
+                  "user_id": "U-00045",
+                  "timestamp": "2025-01-01T10:57:07+00:00",
+                  "amount": 206.98,
+                  "currency": "EUR",
+                  "merchant_id": "M-FUE-019",
+                  "merchant_category": "fuel",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00045",
+                  "ip_address": "203.0.113.0",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2770,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 1,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000304",
+                  "user_id": "U-00004",
+                  "timestamp": "2025-01-01T10:57:40+00:00",
+                  "amount": 72.07,
+                  "currency": "USD",
+                  "merchant_id": "M-RET-054",
+                  "merchant_category": "retail",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00004",
+                  "ip_address": "198.51.100.4",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 356,
+                  "failed_attempts": 2,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "US",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000353",
+                  "user_id": "U-00004",
+                  "timestamp": "2025-01-01T11:00:11+00:00",
+                  "amount": 22.84,
+                  "currency": "USD",
+                  "merchant_id": "M-RES-074",
+                  "merchant_category": "restaurant",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00004",
+                  "ip_address": "198.51.100.4",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 356,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "US",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000298",
+                  "user_id": "U-00045",
+                  "timestamp": "2025-01-01T11:01:17+00:00",
+                  "amount": 59.97,
+                  "currency": "EUR",
+                  "merchant_id": "M-RES-046",
+                  "merchant_category": "restaurant",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-NEW-4707",
+                  "ip_address": "185.220.17.194",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2770,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "FR",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000299",
+                  "user_id": "U-00045",
+                  "timestamp": "2025-01-01T11:06:51+00:00",
+                  "amount": 974.42,
+                  "currency": "EUR",
+                  "merchant_id": "M-ATM-006",
+                  "merchant_category": "atm",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-NEW-0769",
+                  "ip_address": "198.51.100.45",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2770,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000488",
+                  "user_id": "U-00004",
+                  "timestamp": "2025-01-01T11:07:20+00:00",
+                  "amount": 81.37,
+                  "currency": "USD",
+                  "merchant_id": "M-GRO-075",
+                  "merchant_category": "grocery",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00004",
+                  "ip_address": "203.0.113.6",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 356,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 1,
+                  "shipping_country": "UK",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000489",
+                  "user_id": "U-00012",
+                  "timestamp": "2025-01-01T11:54:14+00:00",
+                  "amount": 91.29,
+                  "currency": "EUR",
+                  "merchant_id": "M-GRO-014",
+                  "merchant_category": "grocery",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00012",
+                  "ip_address": "198.51.100.12",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 2742,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000495",
+                  "user_id": "U-00012",
+                  "timestamp": "2025-01-01T11:59:21+00:00",
+                  "amount": 344.79,
+                  "currency": "EUR",
+                  "merchant_id": "M-FUE-032",
+                  "merchant_category": "fuel",
+                  "payment_method": "wallet",
+                  "device_id": "DEV-NEW-7889",
+                  "ip_address": "198.51.100.12",
+                  "country": "DE",
+                  "billing_country": "FR",
+                  "account_age_days": 2742,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000326",
+                  "user_id": "U-00030",
+                  "timestamp": "2025-01-01T13:45:42+00:00",
+                  "amount": 29.66,
+                  "currency": "USD",
+                  "merchant_id": "M-RES-016",
+                  "merchant_category": "restaurant",
+                  "payment_method": "wire",
+                  "device_id": "DEV-NEW-5150",
+                  "ip_address": "198.51.100.30",
+                  "country": "CA",
+                  "billing_country": "CA",
+                  "account_age_days": 2469,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000177",
+                  "user_id": "U-00002",
+                  "timestamp": "2025-01-01T13:53:59+00:00",
+                  "amount": 12.83,
+                  "currency": "EUR",
+                  "merchant_id": "M-SUB-048",
+                  "merchant_category": "subscription",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00002",
+                  "ip_address": "198.51.100.2",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 1837,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "IT",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000300",
+                  "user_id": "U-00000",
+                  "timestamp": "2025-01-01T14:03:14+00:00",
+                  "amount": 29.68,
+                  "currency": "EUR",
+                  "merchant_id": "M-GRO-058",
+                  "merchant_category": "grocery",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00000",
+                  "ip_address": "198.51.100.0",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 2465,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000485",
+                  "user_id": "U-00000",
+                  "timestamp": "2025-01-01T14:03:35+00:00",
+                  "amount": 276.09,
+                  "currency": "EUR",
+                  "merchant_id": "M-TRA-049",
+                  "merchant_category": "travel",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-NEW-0978",
+                  "ip_address": "198.51.100.0",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 2465,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000320",
+                  "user_id": "U-00029",
+                  "timestamp": "2025-01-01T14:28:54+00:00",
+                  "amount": 22.35,
+                  "currency": "USD",
+                  "merchant_id": "M-RES-015",
+                  "merchant_category": "restaurant",
+                  "payment_method": "ach",
+                  "device_id": "DEV-00029",
+                  "ip_address": "198.51.100.29",
+                  "country": "US",
+                  "billing_country": "US",
+                  "account_age_days": 2872,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000250",
+                  "user_id": "U-00028",
+                  "timestamp": "2025-01-01T15:12:37+00:00",
+                  "amount": 138.97,
+                  "currency": "EUR",
+                  "merchant_id": "M-UTI-040",
+                  "merchant_category": "utilities",
+                  "payment_method": "ach",
+                  "device_id": "DEV-NEW-1499",
+                  "ip_address": "198.51.100.28",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 460,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "ES",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000221",
+                  "user_id": "U-00041",
+                  "timestamp": "2025-01-01T15:20:18+00:00",
+                  "amount": 98.94,
+                  "currency": "EUR",
+                  "merchant_id": "M-TRA-065",
+                  "merchant_category": "travel",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00041",
+                  "ip_address": "198.51.100.41",
+                  "country": "FR",
+                  "billing_country": "FR",
+                  "account_age_days": 1365,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000465",
+                  "user_id": "U-00031",
+                  "timestamp": "2025-01-01T15:37:08+00:00",
+                  "amount": 263.15,
+                  "currency": "EUR",
+                  "merchant_id": "M-GRO-059",
+                  "merchant_category": "grocery",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00031",
+                  "ip_address": "198.51.100.31",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 2894,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000325",
+                  "user_id": "U-00011",
+                  "timestamp": "2025-01-01T16:19:31+00:00",
+                  "amount": 73.05,
+                  "currency": "EUR",
+                  "merchant_id": "M-RET-025",
+                  "merchant_category": "retail",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-NEW-2274",
+                  "ip_address": "198.51.100.11",
+                  "country": "UK",
+                  "billing_country": "UK",
+                  "account_age_days": 2054,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "UK",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000219",
+                  "user_id": "U-00023",
+                  "timestamp": "2025-01-01T17:33:02+00:00",
+                  "amount": 63.79,
+                  "currency": "EUR",
+                  "merchant_id": "M-RET-041",
+                  "merchant_category": "retail",
+                  "payment_method": "card_online",
+                  "device_id": "DEV-00023",
+                  "ip_address": "198.51.100.23",
+                  "country": "FR",
+                  "billing_country": "FR",
+                  "account_age_days": 3461,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": null,
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000478",
+                  "user_id": "U-00048",
+                  "timestamp": "2025-01-01T17:35:36+00:00",
+                  "amount": 794.01,
+                  "currency": "EUR",
+                  "merchant_id": "M-ELE-015",
+                  "merchant_category": "electronics",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00048",
+                  "ip_address": "198.51.100.48",
+                  "country": "DE",
+                  "billing_country": "DE",
+                  "account_age_days": 3581,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "DE",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000475",
+                  "user_id": "U-00016",
+                  "timestamp": "2025-01-01T19:07:03+00:00",
+                  "amount": 70.6,
+                  "currency": "USD",
+                  "merchant_id": "M-RET-016",
+                  "merchant_category": "retail",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-NEW-2063",
+                  "ip_address": "198.51.100.16",
+                  "country": "CA",
+                  "billing_country": "CA",
+                  "account_age_days": 3428,
+                  "failed_attempts": 1,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "CA",
+                  "is_fraud": 0
+                },
+                {
+                  "transaction_id": "TX-000035",
+                  "user_id": "U-00036",
+                  "timestamp": "2025-01-01T19:57:42+00:00",
+                  "amount": 19.17,
+                  "currency": "EUR",
+                  "merchant_id": "M-GRO-042",
+                  "merchant_category": "grocery",
+                  "payment_method": "card_chip",
+                  "device_id": "DEV-00036",
+                  "ip_address": "203.0.113.5",
+                  "country": "NL",
+                  "billing_country": "NL",
+                  "account_age_days": 3121,
+                  "failed_attempts": 0,
+                  "previous_chargebacks": 0,
+                  "shipping_country": "UK",
+                  "is_fraud": 0
+                }
+              ],
+              "ctx": {
+                "field_type": "List",
+                "min_length": 50,
+                "actual_length": 40
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "error_generate_invalid_users",
+      "ok": true,
+      "elapsed_ms": 5,
+      "error": null,
+      "result": {
+        "status": 422,
+        "error": {
+          "detail": [
+            {
+              "type": "greater_than_equal",
+              "loc": [
+                "body",
+                "number_of_users"
+              ],
+              "msg": "Input should be greater than or equal to 20",
+              "input": 5,
+              "ctx": {
+                "ge": 20
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "error_analyze_missing_tx",
+      "ok": true,
+      "elapsed_ms": 2078,
+      "error": null,
+      "result": {
+        "status": 404,
+        "error": {
+          "detail": "'transaction_id not found: TX-DOES-NOT-EXIST'"
+        }
+      }
+    }
+  ],
+  "comparison": {
+    "fraud_rate_effect": {
+      "low_1pct": {
+        "count": 1500,
+        "users": 200,
+        "requested_fraud_rate": 0.01,
+        "realized_fraud_rate": 0.01,
+        "fraud_count": 15,
+        "sample_tx": "TX-001323"
+      },
+      "default_4pct": {
+        "count": 2500,
+        "users": 300,
+        "requested_fraud_rate": 0.04,
+        "realized_fraud_rate": 0.04,
+        "fraud_count": 100,
+        "sample_tx": "TX-001207"
+      },
+      "high_15pct": {
+        "count": 1500,
+        "users": 200,
+        "requested_fraud_rate": 0.15,
+        "realized_fraud_rate": 0.15,
+        "fraud_count": 225,
+        "sample_tx": "TX-000060"
+      }
+    },
+    "policy_effect_on_decisions": {
+      "strict": {
+        "allow": 0.708,
+        "review": 0.2733,
+        "block": 0.0187
+      },
+      "default": {
+        "allow": 0.9533,
+        "review": 0.0467,
+        "block": 0.0
+      },
+      "loose": {
+        "allow": 0.9853,
+        "review": 0.0147,
+        "block": 0.0
+      }
+    },
+    "risk_extremes": {
+      "highest": {
+        "transaction_id": "TX-001824",
+        "decision": "REVIEW",
+        "risk_probability": 0.5,
+        "top_features": [
+          {
+            "feature": "account_age_days",
+            "contribution": 1.2345
+          },
+          {
+            "feature": "failed_attempts",
+            "contribution": 0.4669
+          },
+          {
+            "feature": "account_age_days & previous_chargebacks",
+            "contribution": 0.4042
+          }
+        ]
+      },
+      "lowest": {
+        "transaction_id": "TX-001667",
+        "decision": "ALLOW",
+        "risk_probability": 0.0,
+        "top_features": [
+          {
+            "feature": "amount_vs_user_median & account_age_days",
+            "contribution": 0.0533
+          },
+          {
+            "feature": "time_since_previous_transaction & account_age_days",
+            "contribution": 0.0464
+          },
+          {
+            "feature": "amount_zscore_user & ip_user_count",
+            "contribution": 0.042
+          }
+        ]
+      }
+    }
+  }
+}

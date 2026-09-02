@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fraud Lab · Kasauti",
+  title: "Fraud Lab",
   description: "Deterministic fraud evidence workstation — features, EBM, calibration, policy.",
 };
 
