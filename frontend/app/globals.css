@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-paper text-ink font-mono;
+  background-image:
+    linear-gradient(to right, rgba(143, 138, 123, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(143, 138, 123, 0.15) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1d3328 #f4f0e6;
+}
+
+/* CRT terminal mode — phosphor on dark chassis */
+.crt-mode {
+  color-scheme: dark;
+  background:
+    radial-gradient(ellipse at center, rgba(34, 70, 48, 0.35), transparent 65%),
+    #06100b;
+  color: #b7e0c0;
+  text-shadow: 0 0 1px rgba(130, 210, 150, 0.35);
+  background-image:
+    linear-gradient(rgba(8, 20, 12, 0.15) 50%, transparent 50%),
+    linear-gradient(to right, rgba(90, 140, 100, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(90, 140, 100, 0.08) 1px, transparent 1px),
+    radial-gradient(ellipse at center, rgba(34, 70, 48, 0.35), transparent 65%),
+    #06100b;
+  background-size: 100% 3px, 28px 28px, 28px 28px, auto, auto;
+}
+
+.crt-mode * {
+  scrollbar-color: #7dba88 #0a1810;
+}
+
+.crt-mode .bg-paper,
+.crt-mode .bg-stone-100,
+.crt-mode .bg-\[\#f0ebdf\] {
+  background-color: #0b1a12 !important;
+}
+
+.crt-mode .hover\:bg-stone-200:hover {
+  background-color: #143222 !important;
+}
+
+.crt-mode .text-ink,
+.crt-mode .text-stone-600,
+.crt-mode .text-stone-700,
+.crt-mode .placeholder\:text-stone-500::placeholder {
+  color: #b7e0c0 !important;
+}
+
+.crt-mode .border-ink,
+.crt-mode .border-stone-300 {
+  border-color: #3f6b4d !important;
+}
+
+.crt-mode .shadow-print {
+  box-shadow: 4px 4px 0 0 #1e3d28;
+}
+
+.crt-mode .bg-olive {
+  background-color: #1f4a30 !important;
+}
+
+.crt-mode .text-paper {
+  color: #d5f0d9 !important;
+}
+
+.crt-mode .text-amber {
+  color: #d4a84b !important;
+}
+
+.crt-mode .text-red-700 {
+  color: #f0a0a0 !important;
+}
+
+.crt-mode input,
+.crt-mode textarea,
+.crt-mode select {
+  background-color: #07140e !important;
+  color: #c8ecc8 !important;
+  border-color: #3f6b4d !important;
+  caret-color: #8fd49a;
+}
+
+.crt-mode input::placeholder {
+  color: #6f9578 !important;
+}
+
+.crt-mode table th,
+.crt-mode table td {
+  color: #b7e0c0;
+}
+
+.crt-mode pre {
+  color: #c8ecc8;
+}
+
+.crt-mode button:not(.bg-olive) {
+  color: #b7e0c0;
+}
+
+.crt-mode .recharts-cartesian-axis-tick text,
+.crt-mode .recharts-legend-item-text,
+.crt-mode .recharts-text {
+  fill: #9fc9a8 !important;
+}
+
+.crt-mode .recharts-cartesian-grid line {
+  stroke: #2f523b !important;
+}
